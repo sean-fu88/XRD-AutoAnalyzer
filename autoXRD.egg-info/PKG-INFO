@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: autoXRD
+Version: 0.0.1
+Summary: A package designed to automate the process of phase identification from XRD spectra using a probabilistic deep learning trained with physics-informed data augmentation.
+Home-page: https://github.com/njszym/XRD-AutoAnalyzer
+Author: Nathan J. Szymanski
+Author-email: nathan_szymanski@berkeley.edu
+License: MIT
+Requires-Python: >=3.6.0
