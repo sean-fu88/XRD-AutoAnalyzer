@@ -1,4 +1,5 @@
 from scipy.signal import find_peaks, filtfilt, resample
+from autoXRD import Combined_Analysis
 import warnings
 import random
 from tqdm import tqdm
@@ -45,7 +46,7 @@ class SpectrumAnalyzer(object):
     Class used to process and classify xrd spectra.
     """
 
-    def __init__(self, spectra_dir, spectrum_fname, max_phases, cutoff_intensity, min_conf=25.0, wavelen='CuKa', reference_dir='References', min_angle=10.0, max_angle=80.0, model_path='Model.h5'):
+    def __init__(self, spectra_dir, spectrum_fname, max_phases, cutoff_intensity, min_conf=25.0, wavelen='CuKa', reference_dir='References', is_pdf = False, min_angle=10.0, max_angle=80.0, model_path='Model.h5'):
         """
         Args:
             spectrum_fname: name of file containing the
@@ -67,6 +68,7 @@ class SpectrumAnalyzer(object):
         self.min_angle = min_angle
         self.max_angle = max_angle
         self.model_path = model_path
+        self.is_pdf = is_pdf
 
     @property
     def reference_phases(self):
@@ -137,9 +139,9 @@ class SpectrumAnalyzer(object):
         # Allow some tolerance (0.2 degrees) in the two-theta range
         if (min(x) > self.min_angle) and np.isclose(min(x), self.min_angle, atol=0.2):
             x = np.concatenate([np.array([self.min_angle]), x])
-       	    y = np.concatenate([np.array([y[0]]), y])
-       	if (max(x) < self.max_angle) and np.isclose(max(x), self.max_angle, atol=0.2):
-       	    x = np.concatenate([x, np.array([self.max_angle])])
+            y = np.concatenate([np.array([y[0]]), y])
+        if (max(x) < self.max_angle) and np.isclose(max(x), self.max_angle, atol=0.2):
+            x = np.concatenate([x, np.array([self.max_angle])])
             y = np.concatenate([y, np.array([y[-1]])])
 
         # Otherwise, raise an assertion error
@@ -219,7 +221,8 @@ class SpectrumAnalyzer(object):
             prediction_list: a list of all enumerated mixtures
             confidence_list: a list of probabilities associated with the above mixtures
         """
-
+        if self.is_pdf:
+            spectrum = Combined_Analysis.XRDtoPDF(spectrum, self.min_angle, self.max_angle)
         # Make prediction and confidence lists global so they can be updated recursively
         # If this is the top-level of a new mixture (is_first), reset all variables
         if is_first:

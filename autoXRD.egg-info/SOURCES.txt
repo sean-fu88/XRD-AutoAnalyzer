@@ -1,5 +1,6 @@
 README.md
 setup.py
+autoXRD/Combined_Analysis.py
 autoXRD/__init__.py
 autoXRD.egg-info/PKG-INFO
 autoXRD.egg-info/SOURCES.txt

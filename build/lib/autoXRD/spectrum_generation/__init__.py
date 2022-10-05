@@ -1,4 +1,5 @@
 from autoXRD.spectrum_generation import strain_shifts, uniform_shifts, intensity_changes, peak_broadening, impurity_peaks, mixed
+from autoXRD import Combined_Analysis
 import pymatgen as mg
 import numpy as np
 import os
@@ -13,7 +14,7 @@ class SpectraGenerator(object):
     for all reference phases
     """
 
-    def __init__(self, reference_dir, num_spectra=50, max_texture=0.6, min_domain_size=1.0, max_domain_size=100.0, max_strain=0.04, max_shift=0.25, impur_amt=70.0, min_angle=10.0, max_angle=80.0, separate=True):
+    def __init__(self, reference_dir, is_pdf=False, num_spectra=50, max_texture=0.6, min_domain_size=1.0, max_domain_size=100.0, max_strain=0.04, max_shift=0.25, impur_amt=70.0, min_angle=10.0, max_angle=80.0, separate=True):
         """
         Args:
             reference_dir: path to directory containing
@@ -31,6 +32,7 @@ class SpectraGenerator(object):
         self.min_angle = min_angle
         self.max_angle = max_angle
         self.separate = separate
+        self.is_pdf = is_pdf
 
     def augment(self, phase_info):
         """
@@ -58,7 +60,14 @@ class SpectraGenerator(object):
             patterns += impurity_peaks.main(struc, self.num_spectra, self.impur_amt, self.min_angle, self.max_angle)
         else:
             patterns += mixed.main(struc, 5*self.num_spectra, self.max_shift, self.max_strain, self.min_domain_size, self.max_domain_size,  self.max_texture, self.impur_amt, self.min_angle, self.max_angle)
-
+        if self.is_pdf:
+            pdf_specs = []
+            for xrd_pattern in patterns:
+                xrd_pattern = np.array(xrd_pattern).flatten()
+                pdf = Combined_Analysis.XRDtoPDF(xrd_pattern, self.min_angle, self.max_angle)
+                pdf = [[val] for val in pdf]
+                pdf_specs.append(pdf)
+            return (pdf_specs, filename)
         return (patterns, filename)
 
     @property

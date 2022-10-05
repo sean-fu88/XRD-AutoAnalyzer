@@ -60,6 +60,9 @@ class SpectraGenerator(object):
             patterns += impurity_peaks.main(struc, self.num_spectra, self.impur_amt, self.min_angle, self.max_angle)
         else:
             patterns += mixed.main(struc, 5*self.num_spectra, self.max_shift, self.max_strain, self.min_domain_size, self.max_domain_size,  self.max_texture, self.impur_amt, self.min_angle, self.max_angle)
+        with open('xrd_specs.txt', 'w') as filehandle:
+            for listitem in patterns:
+                filehandle.write(f'{listitem}\n')
         if self.is_pdf:
             pdf_specs = []
             for xrd_pattern in patterns:
@@ -67,6 +70,9 @@ class SpectraGenerator(object):
                 pdf = Combined_Analysis.XRDtoPDF(xrd_pattern, self.min_angle, self.max_angle)
                 pdf = [[val] for val in pdf]
                 pdf_specs.append(pdf)
+            with open('pdf_specs.txt', 'w') as filehandle:
+                for listitem in patterns:
+                    filehandle.write(f'{listitem}\n')
             return (pdf_specs, filename)
         return (patterns, filename)
 
@@ -83,7 +89,7 @@ class SpectraGenerator(object):
             grouped_xrd = pool.map(self.augment, phases)
             sorted_xrd = sorted(grouped_xrd, key=lambda x: x[1]) ## Sort by filename
             sorted_spectra = [group[0] for group in sorted_xrd]
-
+            print("done with augmented_spectra")
             return np.array(sorted_spectra)
 
 
