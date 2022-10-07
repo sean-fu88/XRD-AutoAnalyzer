@@ -43,6 +43,7 @@ def make_model(model_name, is_pdf=False, max_texture = 0.5,
     print("got to spectrum")
     # Simulate and save augmented XRD spectra
     xrd_obj = spectrum_generation.SpectraGenerator(reference_dir= 'References',num_spectra= num_spectra,max_texture= max_texture,min_domain_size = min_domain_size, max_domain_size = max_domain_size, max_strain = max_strain, max_shift = max_shift, min_angle = min_angle, max_angle= max_angle, separate= separate, is_pdf=is_pdf)
+    print("initiated")
     xrd_specs = xrd_obj.augmented_spectra
     np.save('XRD', xrd_specs)
     print("onto cnn")

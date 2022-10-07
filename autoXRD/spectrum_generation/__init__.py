@@ -1,5 +1,5 @@
 from autoXRD.spectrum_generation import strain_shifts, uniform_shifts, intensity_changes, peak_broadening, impurity_peaks, mixed
-from autoXRD import Combined_Analysis
+from autoXRD.Combined_Analysis import XRDtoPDF
 import pymatgen as mg
 import numpy as np
 import os
@@ -48,10 +48,10 @@ class SpectraGenerator(object):
             patterns: augmented XRD spectra
             filename: filename of the reference phase
         """
-
+        print("got here?")
         struc, filename = phase_info[0], phase_info[1]
         patterns = []
-
+        print("start_augment")
         if self.separate:
             patterns += strain_shifts.main(struc, self.num_spectra, self.max_strain, self.min_angle, self.max_angle)
             patterns += uniform_shifts.main(struc, self.num_spectra, self.max_shift, self.min_angle, self.max_angle)
@@ -60,14 +60,16 @@ class SpectraGenerator(object):
             patterns += impurity_peaks.main(struc, self.num_spectra, self.impur_amt, self.min_angle, self.max_angle)
         else:
             patterns += mixed.main(struc, 5*self.num_spectra, self.max_shift, self.max_strain, self.min_domain_size, self.max_domain_size,  self.max_texture, self.impur_amt, self.min_angle, self.max_angle)
-        with open('xrd_specs.txt', 'w') as filehandle:
-            for listitem in patterns:
-                filehandle.write(f'{listitem}\n')
+        print("done with patterns")
         if self.is_pdf:
+            print("is a pdf")
             pdf_specs = []
             for xrd_pattern in patterns:
+                print("enter for loop")
                 xrd_pattern = np.array(xrd_pattern).flatten()
-                pdf = Combined_Analysis.XRDtoPDF(xrd_pattern, self.min_angle, self.max_angle)
+                print("to combined")
+                pdf = XRDtoPDF(xrd_pattern, self.min_angle, self.max_angle)
+                print("done xrd2pdf")
                 pdf = [[val] for val in pdf]
                 pdf_specs.append(pdf)
             with open('pdf_specs.txt', 'w') as filehandle:
@@ -78,16 +80,18 @@ class SpectraGenerator(object):
 
     @property
     def augmented_spectra(self):
-
+        print("augmented time")
         phases = []
         for filename in sorted(os.listdir(self.ref_dir)):
             phases.append([Structure.from_file('%s/%s' % (self.ref_dir, filename)), filename])
-
+        print(phases)
         with Manager() as manager:
-
             pool = Pool(self.num_cpu)
+            print("stage1")
             grouped_xrd = pool.map(self.augment, phases)
+            print("stage2")
             sorted_xrd = sorted(grouped_xrd, key=lambda x: x[1]) ## Sort by filename
+            print("stage3")
             sorted_spectra = [group[0] for group in sorted_xrd]
             print("done with augmented_spectra")
             return np.array(sorted_spectra)
