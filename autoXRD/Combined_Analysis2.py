@@ -78,28 +78,21 @@ def structureToXRD(strucName):
 
 
 
-def XRDtoPDF(pattern, min_angle, max_angle):
+def XRDtoPDF2(patterns, min_angle, max_angle):
     """
     r: an instance of a radius in real space (float)
     S: full scattering function (list)
     Q: full span of reciprocal space (list)
     """
     print("got here")
-    x= np.linspace(min_angle, max_angle, 4501)
-    Q, S = [], []
-    for i in range(len(pattern)):
-        two_theta = float(x[i])
-        theta = two_theta / 2.
-        q = 4 * math.pi * math.sin(math.radians(theta)) / 1.5406
-        Q.append(q)
-        S.append(float(pattern[i]))
+    thetas= np.linspace(min_angle/2.0, max_angle/2.0, 4501)
+    # gett
+    Q= np.array([4*math.pi*math.sin(math.radians(theta)) /1.5406 for theta in thetas])
+    S=np.array([float(patterns[i]) for i in range(len(patterns))])
     pdf = []
     R = np.linspace(0, 20, 4501)
-    for r in R:
-        integrand = []
-        for (s, q) in zip(S, Q):
-            integrand.append(q * (s - 0.0) * math.sin(q * r))
-        pdf.append(2 * simps(integrand, Q) / math.pi)
+    integrand = [[Q[i] * S[i] * math.sin(Q[i] * r) for i in range(len(Q))] for r in R]
+    pdf = (2*simps(integrand, Q) / math.pi)
     print("check two xrd2pdf")
     struc = pdf.copy()
     return Q, S, struc

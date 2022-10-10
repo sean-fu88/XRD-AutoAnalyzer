@@ -61,19 +61,32 @@ class SpectraGenerator(object):
         else:
             patterns += mixed.main(struc, 5*self.num_spectra, self.max_shift, self.max_strain, self.min_domain_size, self.max_domain_size,  self.max_texture, self.impur_amt, self.min_angle, self.max_angle)
         print("done with patterns")
+        print(len(patterns))
+        print(len(patterns[0]))
+        print(len(patterns[0][0]))
         if self.is_pdf:
             print("is a pdf")
             pdf_specs = []
+            i = 1
+            # getting 250 xrd spectrums
+            # flattened_pdf = []
+            # for xrd_pattern in patterns:
+            #     xrd_pattern = np.array(xrd_pattern).flatten()
+            #     flattened_pdf = flattened_pdf.append(xrd_pattern)
+            # xrd_patterns = [xrd_pattern.flatten() for xrd_pattern in patterns]
+            # #giving XRDtoPDF a list 
+            # pdf_patterns = XRDtoPDF(xrd_patterns, self.min_angle, self.max_angle) 
             for xrd_pattern in patterns:
-                print("enter for loop")
+                print("enter for loop" +str(i) )
                 xrd_pattern = np.array(xrd_pattern).flatten()
                 print("to combined")
                 pdf = XRDtoPDF(xrd_pattern, self.min_angle, self.max_angle)
                 print("done xrd2pdf")
                 pdf = [[val] for val in pdf]
                 pdf_specs.append(pdf)
+                i+=1
             with open('pdf_specs.txt', 'w') as filehandle:
-                for listitem in patterns:
+                for listitem in patterns[0:3]:
                     filehandle.write(f'{listitem}\n')
             return (pdf_specs, filename)
         return (patterns, filename)
@@ -85,15 +98,15 @@ class SpectraGenerator(object):
         for filename in sorted(os.listdir(self.ref_dir)):
             phases.append([Structure.from_file('%s/%s' % (self.ref_dir, filename)), filename])
         print(phases)
-        with Manager() as manager:
-            pool = Pool(self.num_cpu)
-            print("stage1")
-            grouped_xrd = pool.map(self.augment, phases)
-            print("stage2")
-            sorted_xrd = sorted(grouped_xrd, key=lambda x: x[1]) ## Sort by filename
-            print("stage3")
-            sorted_spectra = [group[0] for group in sorted_xrd]
-            print("done with augmented_spectra")
-            return np.array(sorted_spectra)
+        print("stage1")
+        grouped_xrd = []
+        for ph in phases:
+            grouped_xrd.append(self.augment(ph))
+        print("stage2")
+        sorted_xrd = sorted(grouped_xrd, key=lambda x: x[1]) ## Sort by filename
+        print("stage3")
+        sorted_spectra = [group[0] for group in sorted_xrd]
+        print("done with augmented_spectra")
+        return np.array(sorted_spectra)
 
 
