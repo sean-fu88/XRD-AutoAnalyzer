@@ -9,6 +9,7 @@ from pymatgen.core import Structure
 from scipy.fft import rfft
 import pymatgen as mg
 import warnings
+from time import time
 np.random.seed(1)
 
 def structureToXRD(strucName):
@@ -85,6 +86,7 @@ def XRDtoPDF(pattern, min_angle, max_angle):
     Q: full span of reciprocal space (list)
     """
     print("got here")
+    st_time = time()
     x= np.linspace(min_angle, max_angle, 4501)
     Q, S = [], []
     for i in range(len(pattern)):
@@ -94,6 +96,8 @@ def XRDtoPDF(pattern, min_angle, max_angle):
         Q.append(q)
         S.append(float(pattern[i]))
     pdf = []
+    ed_time = time()
+    print("inside time", ed_time-st_time)
     R = np.linspace(0, 20, 4501)
     for r in R:
         integrand = []
