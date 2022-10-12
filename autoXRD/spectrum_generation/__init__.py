@@ -61,9 +61,6 @@ class SpectraGenerator(object):
         else:
             patterns += mixed.main(struc, 5*self.num_spectra, self.max_shift, self.max_strain, self.min_domain_size, self.max_domain_size,  self.max_texture, self.impur_amt, self.min_angle, self.max_angle)
         print("done with patterns")
-        print(len(patterns))
-        print(len(patterns[0]))
-        print(len(patterns[0][0]))
         if self.is_pdf:
             print("is a pdf")
             pdf_specs = []
@@ -85,9 +82,6 @@ class SpectraGenerator(object):
                 pdf = [[val] for val in pdf]
                 pdf_specs.append(pdf)
                 i+=1
-            with open('pdf_specs.txt', 'w') as filehandle:
-                for listitem in patterns[0:3]:
-                    filehandle.write(f'{listitem}\n')
             return (pdf_specs, filename)
         return (patterns, filename)
 

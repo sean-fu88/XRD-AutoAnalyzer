@@ -143,13 +143,11 @@ def train_model(x_train, y_train, n_phases, num_epochs, is_pdf=False, n_dense=[3
         tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
         tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
         tf.keras.layers.Flatten(),
-        CustomDropout(dropout_rate),
+        tf.keras.layers.Dropout(dropout_rate),
         tf.keras.layers.Dense(n_dense[0], activation=tf.nn.relu),
-        tf.keras.layers.BatchNormalization(),
-        CustomDropout(dropout_rate),
+        tf.keras.layers.Dropout(dropout_rate),
         tf.keras.layers.Dense(n_dense[1], activation=tf.nn.relu),
-        tf.keras.layers.BatchNormalization(),
-        CustomDropout(dropout_rate),
+        tf.keras.layers.Dropout(dropout_rate),
         tf.keras.layers.Dense(n_phases, activation=tf.nn.softmax)])
     else:
         model = tf.keras.Sequential([

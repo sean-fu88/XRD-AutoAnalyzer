@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from scipy.integrate import simps
+from scipy.integrate import cumtrapz, simps
 from scipy.fftpack import dst
 import numpy as np
 import math
@@ -7,6 +7,7 @@ from pymatgen.analysis.diffraction import xrd
 from scipy.ndimage import gaussian_filter1d
 from pymatgen.core import Structure
 from scipy.fft import rfft
+from scipy import signal
 import pymatgen as mg
 import warnings
 from time import time
@@ -79,31 +80,21 @@ def structureToXRD(strucName):
 
 
 
-def XRDtoPDF(pattern, min_angle, max_angle):
+def XRDtoPDF(patterns, min_angle, max_angle):
     """
     r: an instance of a radius in real space (float)
     S: full scattering function (list)
     Q: full span of reciprocal space (list)
     """
-    print("got here")
-    st_time = time()
-    x= np.linspace(min_angle, max_angle, 4501)
-    Q, S = [], []
-    for i in range(len(pattern)):
-        two_theta = float(x[i])
-        theta = two_theta / 2.
-        q = 4 * math.pi * math.sin(math.radians(theta)) / 1.5406
-        Q.append(q)
-        S.append(float(pattern[i]))
+    thetas= np.linspace(min_angle/2.0, max_angle/2.0, 4501)
+    Q= [4*math.pi*math.sin(math.radians(theta)) /1.5406 for theta in thetas]
+    S=[float(patterns[i]) for i in range(len(patterns))]
     pdf = []
-    ed_time = time()
-    print("inside time", ed_time-st_time)
-    R = np.linspace(0, 20, 4501)
-    for r in R:
-        integrand = []
-        for (s, q) in zip(S, Q):
-            integrand.append(q * (s - 0.0) * math.sin(q * r))
-        pdf.append(2 * simps(integrand, Q) / math.pi)
-    print("check two xrd2pdf")
+    R = np.linspace(0, 20, 1000)
+    integrand = [[Q[i] * S[i] * math.sin(Q[i] * r) for i in range(len(Q))] for r in R]
+    
+    #pdf = (2*cumtrapz(integrand, Q) / math.pi)
+    pdf = (2*np.trapz(integrand, Q) / math.pi)
+    pdf = list(signal.resample(pdf, 4501))
     struc = pdf.copy()
     return Q, S, struc
