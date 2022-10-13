@@ -97,4 +97,4 @@ def XRDtoPDF(patterns, min_angle, max_angle):
     pdf = (2*np.trapz(integrand, Q) / math.pi)
     pdf = list(signal.resample(pdf, 4501))
     struc = pdf.copy()
-    return Q, S, struc
+    return struc
