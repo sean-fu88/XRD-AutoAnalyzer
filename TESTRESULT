@@ -1,0 +1,89 @@
+Running phase identification
+[4.890573e-16 1.000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+[7.3540934e-38 1.0000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+[4.987592e-16 1.000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+[1.5947732e-18 1.0000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+Running phase identification
+[9.137518e-10 2.986262e-09 1.000000e+00] 0
+2
+['MnO_225.cif', 'TiO2_141.cif']
+[4.0978395e-15 1.0000000e+00 6.9757435e-29] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+[7.9034827e-08 9.9999994e-01 2.3781113e-28] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+Running phase identification
+range(0, 1)
+[4.987592e-16 1.000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+range(0, 1)
+[1.5947732e-18 1.0000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+range(0, 1)
+[4.890573e-16 1.000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+range(0, 1)
+[7.3540934e-38 1.0000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+Running phase identification
+range(0, 1)
+[9.137518e-10 2.986262e-09 1.000000e+00] 0
+2
+['MnO_225.cif', 'TiO2_141.cif']
+range(0, 1)
+[4.039597e-15 1.000000e+00 6.970397e-29] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+range(0, 1)
+[7.9098761e-08 9.9999994e-01 2.3708147e-28] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+Running phase identification
+range(0, 1)
+[4.987592e-16 1.000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+TiO2_141.cif
+range(0, 1)
+[1.5947732e-18 1.0000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+TiO2_141.cif
+range(0, 1)
+[4.890573e-16 1.000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+TiO2_141.cif
+range(0, 1)
+[7.3540934e-38 1.0000000e+00] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+TiO2_141.cif
+Running phase identification
+range(0, 1)
+[9.1285685e-10 2.9821470e-09 1.0000000e+00] 0
+2
+['MnO_225.cif', 'TiO2_141.cif']
+range(0, 1)
+[4.0404772e-15 1.0000000e+00 6.9678394e-29] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+TiO2_141.cif
+range(0, 1)
+[7.9147370e-08 9.9999994e-01 2.3708383e-28] 0
+1
+['MnO_225.cif', 'TiO2_141.cif']
+TiO2_141.cif

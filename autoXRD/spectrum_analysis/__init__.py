@@ -250,6 +250,7 @@ class SpectrumAnalyzer(object):
             spec_list.append(indiv_spec)
 
         # Explore all phases with a non-trival probability
+        print(range(num_phases))
         for i in range(num_phases):
 
             # If individual predictions have been updated recursively, use them for this iteration
@@ -257,8 +258,11 @@ class SpectrumAnalyzer(object):
                 if updated_pred != None:
                     indiv_pred, indiv_conf, indiv_scale, indiv_backup, indiv_spec = updated_pred, updated_conf, updated_scale, updated_spec, updated_backup
                     updated_pred, updated_conf, updated_scale, updated_backup, updated_spec = None, None, None, None, None
-
+            print(np.array(prediction), i)
             phase_index = np.array(prediction).argsort()[-(i+1)]
+            print(phase_index)
+            print(self.reference_phases)
+            print(self.reference_phases[phase_index])
             predicted_cmpd = self.reference_phases[phase_index]
 
             # If there exists two probable phases
@@ -722,4 +726,5 @@ def main(spectra_directory, reference_directory, max_phases=3, cutoff_intensity=
 
     spectrum_names, predicted_phases, confidences, backup_phases, scale_factors, reduced_spectra = phase_id.all_predictions
 
-    return spectrum_names, predicted_phases, confidences, backup_phases, scale_factors, reduced_spectra
+    return spectrum_names, predicted_phases, confidences
+    # backup_phases, scale_factors, reduced_spectra

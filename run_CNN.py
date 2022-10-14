@@ -48,20 +48,22 @@ def run_CNNs(model_name,spectra_directory,reference_directory,
     # wavelength = 'CuKa' # default: spectra was measured using Cu K_alpha radiation
     # min_angle, max_angle = 10.0, 100.0
 
-
-    pdf_spectrum_names, pdf_predicted_phases, pdf_confidences = spectrum_analysis.main(max_phases,
-                                                                                           cutoff_intensity,
-                                                                                           wavelength,
-                                                                                           min_angle,
-                                                                                           max_angle,
-                                                                                           model_name = "pdf_" + model_name,
+    model_path_pdf = f"pdf_{model_name}"
+    model_path_xrd = f"xrd_{model_name}"
+    pdf_spectrum_names, pdf_predicted_phases, pdf_confidences = spectrum_analysis.main(max_phases=max_phases,
+                                                                                           cutoff_intensity=cutoff_intensity,
+                                                                                           wavelength =wavelength,
+                                                                                           min_angle=min_angle,
+                                                                                           max_angle=max_angle,
+                                                                                           model_path =model_path_pdf,
                                                                                            spectra_directory = spectra_directory,
                                                                                            reference_directory=reference_directory)
-    xrd_spectrum_names, xrd_predicted_phases, xrd_confidences = spectrum_analysis.main(max_phases,
-                                                                                           cutoff_intensity,
-                                                                                           wavelength, min_angle,
-                                                                                           max_angle,
-                                                                                           model_name = "xrd_" + model_name,
+    xrd_spectrum_names, xrd_predicted_phases, xrd_confidences = spectrum_analysis.main(max_phases=max_phases,
+                                                                                           cutoff_intensity=cutoff_intensity,
+                                                                                           wavelength =wavelength,
+                                                                                           min_angle=min_angle,
+                                                                                           max_angle=max_angle,
+                                                                                           model_path = model_path_xrd,
                                                                                            spectra_directory = spectra_directory,
                                                                                            reference_directory=reference_directory)
 
