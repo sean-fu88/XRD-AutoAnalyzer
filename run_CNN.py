@@ -40,7 +40,7 @@ def merge_predictions(preds, confs, cutoff=50.0, max_phases=3):
 
 def run_CNNs(model_name,spectra_directory,reference_directory, 
             max_phases=4, cutoff_intensity=5,wavelength='CuKa',min_angle=10.0, 
-            max_angle=100.0, sys_args = None):
+            max_angle=100.0, sys_args = []):
     start = time.time()
 
     # max_phases = 4 # default: a maximum 4 phases in each mixture
@@ -123,7 +123,7 @@ def run_CNNs(model_name,spectra_directory,reference_directory,
 
     elapsed_time = round(end - start, 1)
     results_string = results_string + 'Total time: %s sec' % elapsed_time + "\n"
-    results_name = "RESULTS_"+ model_name + "_" + spectra_directory + ".txt"
+    results_name = "Results/"+"RESULTS_"+ model_name + "_" + spectra_directory + ".txt"
     results_file = open(results_name, "w")
     results_file.write(results_string)
     results_file.close

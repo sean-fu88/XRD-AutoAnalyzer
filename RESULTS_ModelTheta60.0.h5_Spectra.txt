@@ -1,0 +1,7 @@
+Filename: MnO.xy
+Predicted phases: ['TiO2_141', 'MnO_225']
+Confidence: [50.0, 50.0]
+Filename: TiO2.xy
+Predicted phases: ['TiO2_141']
+Confidence: [99.0]
+Total time: 69.7 sec
