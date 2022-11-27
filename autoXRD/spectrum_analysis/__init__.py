@@ -16,6 +16,7 @@ from multiprocessing import Pool, Manager
 from pymatgen.core import Structure
 from pyts import metrics
 import math
+from autoXRD.Combined_Analysis import XRDtoPDF
 
 np.random.seed(1)
 tf.random.set_seed(1)
@@ -45,7 +46,7 @@ class SpectrumAnalyzer(object):
     Class used to process and classify xrd spectra.
     """
 
-    def __init__(self, spectra_dir, spectrum_fname, max_phases, cutoff_intensity, min_conf=25.0, wavelen='CuKa', reference_dir='References', min_angle=10.0, max_angle=80.0, model_path='Model.h5'):
+    def __init__(self, spectra_dir, spectrum_fname, max_phases, cutoff_intensity, min_conf=25.0, wavelen='CuKa', reference_dir='References', min_angle=10.0, max_angle=80.0, model_path='Model.h5', is_pdf=False):
         """
         Args:
             spectrum_fname: name of file containing the
@@ -67,6 +68,7 @@ class SpectrumAnalyzer(object):
         self.min_angle = min_angle
         self.max_angle = max_angle
         self.model_path = model_path
+        self.is_pdf = is_pdf
 
     @property
     def reference_phases(self):
@@ -137,9 +139,9 @@ class SpectrumAnalyzer(object):
         # Allow some tolerance (0.2 degrees) in the two-theta range
         if (min(x) > self.min_angle) and np.isclose(min(x), self.min_angle, atol=0.2):
             x = np.concatenate([np.array([self.min_angle]), x])
-       	    y = np.concatenate([np.array([y[0]]), y])
-       	if (max(x) < self.max_angle) and np.isclose(max(x), self.max_angle, atol=0.2):
-       	    x = np.concatenate([x, np.array([self.max_angle])])
+            y = np.concatenate([np.array([y[0]]), y])
+        if (max(x) < self.max_angle) and np.isclose(max(x), self.max_angle, atol=0.2):
+            x = np.concatenate([x, np.array([self.max_angle])])
             y = np.concatenate([y, np.array([y[-1]])])
 
         # Otherwise, raise an assertion error
@@ -192,7 +194,7 @@ class SpectrumAnalyzer(object):
 
         return smoothed_ys
 
-    def enumerate_routes(self, spectrum, indiv_pred=[], indiv_conf=[], indiv_backup=[], prediction_list=[], confidence_list=[],
+    def enumerate_routes(self, xrd_spectrum, indiv_pred=[], indiv_conf=[], indiv_backup=[], prediction_list=[], confidence_list=[],
         backup_list=[], is_first=True, normalization=1.0, indiv_scale=[], scale_list=[], indiv_spec=[], spec_list=[]):
         """
         A branching algorithm designed to explore all suspected mixtures predicted by the CNN.
@@ -219,7 +221,8 @@ class SpectrumAnalyzer(object):
             prediction_list: a list of all enumerated mixtures
             confidence_list: a list of probabilities associated with the above mixtures
         """
-
+        if self.is_pdf:
+            pdf_spectrum = XRDtoPDF(xrd_spectrum, self.min_angle, self.max_angle)
         # Make prediction and confidence lists global so they can be updated recursively
         # If this is the top-level of a new mixture (is_first), reset all variables
         if is_first:
@@ -229,7 +232,7 @@ class SpectrumAnalyzer(object):
             indiv_pred, indiv_conf, indiv_backup, indiv_scale = [], [], [], []
             indiv_spec, spec_list = [], []
 
-        prediction, num_phases, certanties = self.kdp.predict(spectrum, self.min_conf)
+        prediction, num_phases, certanties = self.kdp.predict(pdf_spectrum, self.min_conf)
 
         # If no phases are suspected
         if num_phases == 0:
@@ -296,7 +299,7 @@ class SpectrumAnalyzer(object):
             indiv_backup.append(backup_cmpd)
 
             # Subtract identified phase from the spectrum
-            reduced_spectrum, norm, scaling_constant, is_done = self.get_reduced_pattern(predicted_cmpd, spectrum, last_normalization=normalization)
+            reduced_spectrum, norm, scaling_constant, is_done = self.get_reduced_pattern(predicted_cmpd, xrd_spectrum, last_normalization=normalization)
 
             # Record actual spectrum (non-scaled) after peak substraction of known phases
             actual_spectrum = reduced_spectrum / norm
@@ -307,7 +310,7 @@ class SpectrumAnalyzer(object):
 
             # If all phases have been identified, tabulate mixture and move on to next
             if is_done:
-                reduced_spectrum = spectrum.copy()
+                reduced_spectrum = xrd_spectrum.copy()
                 confidence_list.append(indiv_conf)
                 prediction_list.append(indiv_pred)
                 scale_list.append(indiv_scale)
@@ -613,7 +616,7 @@ class PhaseIdentifier(object):
     Class used to identify phases from a given set of xrd spectra
     """
 
-    def __init__(self, spectra_directory, reference_directory, max_phases, cutoff_intensity, min_conf, wavelength, min_angle=10.0, max_angle=80.0, parallel=True, model_path='Model.h5'):
+    def __init__(self, spectra_directory, reference_directory, max_phases, cutoff_intensity, min_conf, wavelength, min_angle=10.0, max_angle=80.0, parallel=True, model_path='Model.h5', is_pdf=False):
         """
         Args:
             spectra_dir: path to directory containing the xrd
@@ -633,6 +636,7 @@ class PhaseIdentifier(object):
         self.min_angle = min_angle
         self.max_angle = max_angle
         self.model_path = model_path
+        self.is_pdf = is_pdf
 
     @property
     def all_predictions(self):
@@ -682,7 +686,7 @@ class PhaseIdentifier(object):
         tabulate_conf, predicted_cmpd_set = [], []
 
         spec_analysis = SpectrumAnalyzer(self.spectra_dir, spectrum_fname, self.max_phases, self.cutoff, self.min_conf,
-            wavelen=self.wavelen, min_angle=self.min_angle, max_angle=self.max_angle, model_path=self.model_path)
+            wavelen=self.wavelen, min_angle=self.min_angle, max_angle=self.max_angle, model_path=self.model_path, is_pdf=self.is_pdf)
 
         mixtures, confidences, backup_mixtures, scalings, spectra = spec_analysis.suspected_mixtures
 
@@ -712,10 +716,10 @@ class PhaseIdentifier(object):
         return [spectrum_fname, predicted_set, final_confidences, backup_set, scaling_constants, specs]
 
 
-def main(spectra_directory, reference_directory, max_phases=3, cutoff_intensity=10, min_conf=10.0, wavelength='CuKa', min_angle=10.0, max_angle=80.0, parallel=True, model_path='Model.h5'):
+def main(spectra_directory, reference_directory, max_phases=3, cutoff_intensity=10, min_conf=10.0, wavelength='CuKa', min_angle=10.0, max_angle=80.0, parallel=True, model_path='Model.h5', is_pdf=False):
 
     phase_id = PhaseIdentifier(spectra_directory, reference_directory, max_phases,
-        cutoff_intensity, min_conf, wavelength, min_angle, max_angle, parallel, model_path)
+        cutoff_intensity, min_conf, wavelength, min_angle, max_angle, parallel, model_path, is_pdf)
 
     spectrum_names, predicted_phases, confidences, backup_phases, scale_factors, reduced_spectra = phase_id.all_predictions
 
