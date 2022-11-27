@@ -119,7 +119,7 @@ class DataSetUp(object):
 
             return np.array(train_x), np.array(train_y), np.array(test_x), np.array(test_y)
 
-def train_model(x_train, y_train, n_phases, num_epochs, n_dense=[3100, 1200], dropout_rate=0.7):
+def train_model(x_train, y_train, n_phases, num_epochs, n_dense=[3100, 1200], dropout_rate=0.7, is_pdf = False):
     """
     Args:
         x_train: numpy array of simulated xrd spectra
@@ -133,28 +133,48 @@ def train_model(x_train, y_train, n_phases, num_epochs, n_dense=[3100, 1200], dr
     """
 
     # Define network structure
-    model = tf.keras.Sequential([
-    tf.keras.layers.Conv1D(filters=64, kernel_size=35, strides=1, padding='same', activation = tf.nn.relu),
-    tf.keras.layers.MaxPool1D(pool_size=3, strides=2, padding='same'),
-    tf.keras.layers.Conv1D(filters=64, kernel_size=30, strides=1, padding='same', activation = tf.nn.relu),
-    tf.keras.layers.MaxPool1D(pool_size=3, strides=2, padding='same'),
-    tf.keras.layers.Conv1D(filters=64, kernel_size=25, strides=1, padding='same', activation = tf.nn.relu),
-    tf.keras.layers.MaxPool1D(pool_size=2, strides=2, padding='same'),
-    tf.keras.layers.Conv1D(filters=64, kernel_size=20, strides=1, padding='same', activation = tf.nn.relu),
-    tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
-    tf.keras.layers.Conv1D(filters=64, kernel_size=15, strides=1, padding='same', activation = tf.nn.relu),
-    tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
-    tf.keras.layers.Conv1D(filters=64, kernel_size=10, strides=1, padding='same', activation = tf.nn.relu),
-    tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
-    tf.keras.layers.Flatten(),
-    CustomDropout(dropout_rate),
-    tf.keras.layers.Dense(n_dense[0], activation=tf.nn.relu),
-    tf.keras.layers.BatchNormalization(),
-    CustomDropout(dropout_rate),
-    tf.keras.layers.Dense(n_dense[1], activation=tf.nn.relu),
-    tf.keras.layers.BatchNormalization(),
-    CustomDropout(dropout_rate),
-    tf.keras.layers.Dense(n_phases, activation=tf.nn.softmax)])
+    if is_pdf:
+        print("first model")
+        model = tf.keras.Sequential([
+        tf.keras.layers.Conv1D(filters=64, kernel_size=60, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=3, strides=2, padding='same'),
+        tf.keras.layers.MaxPool1D(pool_size=3, strides=2, padding='same'),
+        tf.keras.layers.MaxPool1D(pool_size=2, strides=2, padding='same'),
+        tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
+        tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
+        tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
+        tf.keras.layers.Flatten(),
+        CustomDropout(dropout_rate),
+        tf.keras.layers.Dense(n_dense[0], activation=tf.nn.relu),
+        tf.keras.layers.BatchNormalization(),
+        CustomDropout(dropout_rate),
+        tf.keras.layers.Dense(n_dense[1], activation=tf.nn.relu),
+        tf.keras.layers.BatchNormalization(),
+        CustomDropout(dropout_rate),
+        tf.keras.layers.Dense(n_phases, activation=tf.nn.softmax)])
+    else:
+        model = tf.keras.Sequential([
+        tf.keras.layers.Conv1D(filters=64, kernel_size=35, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=3, strides=2, padding='same'),
+        tf.keras.layers.Conv1D(filters=64, kernel_size=30, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=3, strides=2, padding='same'),
+        tf.keras.layers.Conv1D(filters=64, kernel_size=25, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=2, strides=2, padding='same'),
+        tf.keras.layers.Conv1D(filters=64, kernel_size=20, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
+        tf.keras.layers.Conv1D(filters=64, kernel_size=15, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
+        tf.keras.layers.Conv1D(filters=64, kernel_size=10, strides=1, padding='same', activation = tf.nn.relu),
+        tf.keras.layers.MaxPool1D(pool_size=1, strides=2, padding='same'),
+        tf.keras.layers.Flatten(),
+        CustomDropout(dropout_rate),
+        tf.keras.layers.Dense(n_dense[0], activation=tf.nn.relu),
+        tf.keras.layers.BatchNormalization(),
+        CustomDropout(dropout_rate),
+        tf.keras.layers.Dense(n_dense[1], activation=tf.nn.relu),
+        tf.keras.layers.BatchNormalization(),
+        CustomDropout(dropout_rate),
+        tf.keras.layers.Dense(n_phases, activation=tf.nn.softmax)])
 
     # Compile model
     model.compile(loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False), optimizer=tf.keras.optimizers.Adam(), metrics=[tf.keras.metrics.CategoricalAccuracy()])
@@ -176,7 +196,7 @@ def test_model(model, test_x, test_y):
     _, acc = model.evaluate(test_x, test_y)
     print('Test Accuracy: ' + str(acc*100) + '%')
 
-def main(xrd, num_epochs, testing_fraction, fmodel='Model.h5'):
+def main(xrd, num_epochs, testing_fraction, fmodel='Model.h5', is_pdf=False):
 
     # Organize data
     obj = DataSetUp(xrd, testing_fraction)
@@ -184,10 +204,14 @@ def main(xrd, num_epochs, testing_fraction, fmodel='Model.h5'):
     train_x, train_y, test_x, test_y = obj.split_training_testing()
 
     # Train model
-    model = train_model(train_x, train_y, num_phases, num_epochs)
+    model = train_model(train_x, train_y, num_phases, num_epochs, is_pdf)
 
     # Save model
-    model.save(fmodel, include_optimizer=False)
+    if is_pdf:
+        model_filename = "PDF_" + fmodel
+    else:
+        model_filename = "XRD_" + fmodel
+    model.save(model_filename, include_optimizer=False)
 
     # Test model is any data is reserved for testing
     if testing_fraction != 0:
